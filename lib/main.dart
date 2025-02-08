@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import 'package:flutter/animation.dart';
 
 void main() {
   runApp(DoomScrollApp());
@@ -358,33 +359,62 @@ class _DopamineDetoxPageState extends State<DopamineDetoxPage> {
   }
 }
 
+
+
 class ProgressiveVisualizerPage extends StatelessWidget {
   final int scrollCount;
 
   ProgressiveVisualizerPage({required this.scrollCount});
 
   final List<Map<String, dynamic>> creatures = [
-    {'name': 'Mouse', 'size': 6, 'clipart': Icons.mouse},
-    {'name': 'Rat', 'size': 10, 'clipart': Icons.pets},
-    {'name': 'Rabbit', 'size': 20, 'clipart': Icons.grass},
-    {'name': 'Dog', 'size': 40, 'clipart': Icons.directions_walk},
-    {'name': 'Horse', 'size': 96, 'clipart': Icons.fence},
-    {'name': 'Giraffe', 'size': 216, 'clipart': Icons.emoji_nature},
-    {'name': 'T-Rex', 'size': 600, 'clipart': Icons.forest},
-    {'name': 'Blue Whale', 'size': 1200, 'clipart': Icons.water},
-    {'name': 'Skyscraper', 'size': 3600, 'clipart': Icons.location_city},
+    {'name': 'Mouse', 'size': 6, 'clipart': 'assets/images/mouse.png'},
+    {'name': 'Cat', 'size': 10, 'clipart': 'assets/images/cat.jpg'},
+    {'name': 'Rabbit', 'size': 20, 'clipart': 'assets/images/rabbit.png'},
+    {'name': 'Dog', 'size': 40, 'clipart': 'assets/images/dog.png'},
+    {'name': 'Human', 'size': 70, 'clipart': 'assets/images/human.png'},
+    {'name': 'Horse', 'size': 96, 'clipart': 'assets/images/horse.png'},
+    {'name': 'Giraffe', 'size': 216, 'clipart': 'assets/images/giraffe.png'},
+    {'name': 'T-Rex', 'size': 600, 'clipart': 'assets/images/trex.png'},
+    {'name': 'Mammoth', 'size': 2500, 'clipart': 'assets/images/mammoth.png'},
+    {'name': 'Dragon', 'size': 5000, 'clipart': 'assets/images/dragon.png'},
+    {'name': 'Phoenix', 'size': 7000, 'clipart': 'assets/images/phoenix.png'},
+    {'name': 'Kraken', 'size': 10000, 'clipart': 'assets/images/kraken.png'},
+    {
+      'name': 'Giant Squid',
+      'size': 11000,
+      'clipart': 'assets/images/giant_squid.png'
+    },
+    {'name': 'Unicorn', 'size': 15000, 'clipart': 'assets/images/unicorn.png'},
+    {'name': 'Hydra', 'size': 20000, 'clipart': 'assets/images/hydra.png'},
+    {
+      'name': 'Godzilla',
+      'size': 25000,
+      'clipart': 'assets/images/godzilla.png'
+    },
+    {
+      'name': 'Blue Whale',
+      'size': 36000,
+      'clipart': 'assets/images/blue_whale.png'
+    },
+    {
+      'name': 'Skyscraper',
+      'size': 100000,
+      'clipart': 'assets/images/skyscraper.png'
+    }, // Largest for reference
   ];
 
   @override
   Widget build(BuildContext context) {
     double totalDistanceInches = scrollCount * 6.0;
     double totalDistanceFeet = totalDistanceInches / 12.0;
-    int unlockedIndex = creatures.indexWhere((creature) => totalDistanceInches < creature['size'] * 12.0);
+    int unlockedIndex = creatures.indexWhere((creature) =>
+    totalDistanceInches < creature['size'] * 12.0);
     if (unlockedIndex == -1) unlockedIndex = creatures.length - 1;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Progress Visualizer', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Progress Visualizer',
+            style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: Column(
         children: [
@@ -411,22 +441,24 @@ class ProgressiveVisualizerPage extends StatelessWidget {
                 bool isUnlocked = index <= unlockedIndex;
                 return Container(
                   margin: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-
-
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      Image.asset(
                         creatures[index]['clipart'],
-                        size: 100,
-                        color: isUnlocked ? DoomScrollApp.chumbo : DoomScrollApp.cinza,
+                        height: 100,
+                        width: 100,
+
+                        fit: BoxFit.cover,
                       ),
                       Text(
                         creatures[index]['name'],
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: isUnlocked ? DoomScrollApp.preto : DoomScrollApp.cinza,
+                          color: isUnlocked
+                              ? DoomScrollApp.preto
+                              : DoomScrollApp.cinza,
                         ),
                       ),
                     ],
