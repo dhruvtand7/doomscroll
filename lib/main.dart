@@ -176,57 +176,73 @@ class ProgressiveVisualizerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double totalDistanceInches = scrollCount * 6.0; // Ensure double
-    double totalDistanceFeet = totalDistanceInches / 12.0; // Convert to double
+    double totalDistanceInches = scrollCount * 6.0;
+    double totalDistanceFeet = totalDistanceInches / 12.0;
 
-    Map<String, dynamic> currentCreature = creatures[0];
-    Map<String, dynamic>? nextCreature;
-    double progressToNext = 0.0;
+    int unlockedIndex = 0; // Track last unlocked creature
 
-    // Determine current creature and progress to next
     for (int i = 0; i < creatures.length; i++) {
-      double currentSizeInInches = creatures[i]['size'] * 12.0; // Ensure double
-
-      if (totalDistanceInches < currentSizeInInches) {
-        currentCreature = creatures[i];
-        if (i + 1 < creatures.length) {
-          nextCreature = creatures[i + 1];
-          double nextSizeInInches = nextCreature['size'] * 12.0; // Ensure double
-
-          progressToNext = (totalDistanceInches - currentSizeInInches) /
-              (nextSizeInInches - currentSizeInInches);
-        }
+      double currentSizeInInches = creatures[i]['size'] * 12.0;
+      if (totalDistanceInches >= currentSizeInInches) {
+        unlockedIndex = i;
+      } else {
         break;
       }
     }
 
     return Scaffold(
       appBar: AppBar(title: Text('Scroll Visualizer')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Reels Scrolled: $scrollCount', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            SizedBox(height: 20),
-            Text('Distance Scrolled: ${totalDistanceFeet.toStringAsFixed(1)} ft', style: TextStyle(fontSize: 20)),
-            SizedBox(height: 30),
-            Column(
-              children: [
-                Icon(currentCreature['clipart'], size: 100, color: Colors.blue),
-                SizedBox(height: 10),
-                Text(currentCreature['name'], style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              ],
+      body: Column(
+        children: [
+          SizedBox(height: 20),
+          Text(
+            'Reels Scrolled: $scrollCount',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Distance Scrolled: ${totalDistanceFeet.toStringAsFixed(1)} ft',
+            style: TextStyle(fontSize: 20),
+          ),
+          SizedBox(height: 30),
+          Expanded(
+            child: PageView.builder(
+              itemCount: creatures.length,
+              controller: PageController(initialPage: unlockedIndex),
+              itemBuilder: (context, index) {
+                bool isUnlocked = index <= unlockedIndex;
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      creatures[index]['clipart'],
+                      size: 100,
+                      color: isUnlocked ? Colors.blue : Colors.grey.shade400,
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      creatures[index]['name'],
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: isUnlocked ? Colors.black : Colors.grey,
+                      ),
+                    ),
+                    if (!isUnlocked)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          "Locked",
+                          style: TextStyle(fontSize: 16, color: Colors.red),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
-            SizedBox(height: 20),
-            if (nextCreature != null)
-              Column(
-                children: [
-                  Text('${(progressToNext * 100).toStringAsFixed(1)}% unlocked', style: TextStyle(fontSize: 16, color: Colors.grey)),
-                ],
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
