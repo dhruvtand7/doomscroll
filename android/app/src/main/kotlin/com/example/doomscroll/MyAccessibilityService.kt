@@ -53,7 +53,7 @@ class MyAccessibilityService : AccessibilityService() {
 
                             // Increment the static counter and calculate swipe length
                             scrollCounter++
-                            val swipeLength = scrollCounter * 6.5
+                            val swipeLength = scrollCounter * 0.54
                             Log.d("MyAccessibilityService", "Scroll event count: $scrollCounter, Total swipe length: $swipeLength ft")
 
                             // Compare the swipe length against our landmarks
