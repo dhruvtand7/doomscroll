@@ -73,16 +73,8 @@ class _ScrollTrackerPageState extends State<ScrollTrackerPage> {
   @override
   void initState() {
     super.initState();
-    _requestAccessibilityPermission();
     _checkIfInstagramIsRunning();
-  }
-
-  Future<void> _requestAccessibilityPermission() async {
-    try {
-      await platform.invokeMethod('requestAccessibilityPermission');
-    } on PlatformException catch (e) {
-      print("Failed to request accessibility permission: '${e.message}'.");
-    }
+    _requestAccessibilityPermission();
   }
 
   Future<void> _checkIfInstagramIsRunning() async {
@@ -93,6 +85,14 @@ class _ScrollTrackerPageState extends State<ScrollTrackerPage> {
       });
     } on PlatformException catch (e) {
       print("Failed to check app state: '${e.message}'.");
+    }
+  }
+
+  Future<void> _requestAccessibilityPermission() async {
+    try {
+      await platform.invokeMethod('requestAccessibilityPermission');
+    } on PlatformException catch (e) {
+      print("Failed to request accessibility permission: '${e.message}'.");
     }
   }
 
@@ -108,7 +108,7 @@ class _ScrollTrackerPageState extends State<ScrollTrackerPage> {
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
-    if (_isSwipe) {
+    if (_isSwipe && _isInstagramRunning) {
       double delta = _startPosition - (details.primaryVelocity ?? 0.0);
       if (delta > 100) {
         setState(() {

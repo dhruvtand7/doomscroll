@@ -1,14 +1,12 @@
 package com.example.doomscroll
 
-import android.accessibilityservice.AccessibilityService
-import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
-import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
+import android.accessibilityservice.AccessibilityServiceInfo
+import android.app.Activity
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine

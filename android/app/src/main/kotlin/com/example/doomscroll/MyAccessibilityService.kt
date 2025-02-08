@@ -1,44 +1,59 @@
 package com.example.doomscroll
 
 import android.accessibilityservice.AccessibilityService
-import android.view.accessibility.AccessibilityEvent
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.util.Log  // Import Log for logging
+import android.view.accessibility.AccessibilityEvent
+import android.util.Log
+import android.os.Handler
+import android.os.Looper
 
 class MyAccessibilityService : AccessibilityService() {
 
+    private var isScrolling: Boolean = false  // Flag to track if a scroll event is already processed
+    private val scrollDelay: Long = 650L  // Time delay to reduce sensitivity (500ms)
+
     override fun onServiceConnected() {
-        // Configure the service info for event types and feedback
         val info = AccessibilityServiceInfo().apply {
-            eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+            eventTypes = AccessibilityEvent.TYPE_VIEW_SCROLLED or
+                    AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
             feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
             flags = AccessibilityServiceInfo.DEFAULT
         }
-        this.serviceInfo = info
+        serviceInfo = info
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         event?.let {
-            // Check if the event is a window state change
-            if (it.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                // Extract the package name of the app that triggered the event
-                val packageName = it.packageName?.toString()
+            val packageName = it.packageName?.toString()
 
-                // Log the package name of the current app
-                Log.d("AccessibilityService", "Current app package: $packageName")
+            // Only track Instagram scrolling events
+            if (packageName == "com.instagram.android") {
+                when (it.eventType) {
+                    AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
+                        Log.d("MyAccessibilityService", "Instagram is in the foreground")
+                    }
+                    AccessibilityEvent.TYPE_VIEW_SCROLLED -> {
+                        // Check if a scroll event is already being processed
+                        if (!isScrolling) {
+                            // Set flag to indicate scrolling is in progress
+                            isScrolling = true
+                            Log.d("MyAccessibilityService", "Instagram scroll detected!")
 
-                // If the package name matches Instagram, you can perform your desired action
-                if (packageName == "com.instagram.android") {
-                    // Instagram is in the foreground
-                    // Example action: Log the event or trigger a behavior
-                    Log.d("AccessibilityService", "Instagram is in the foreground")
+                            // Simulate a short delay before allowing another scroll detection
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                // Reset flag after the delay
+                                isScrolling = false
+                            }, scrollDelay)
+                        } else {
+                            Log.d("MyAccessibilityService", "Ignoring rapid scroll event")
+                        }
+                    }
                 }
             }
         }
     }
 
     override fun onInterrupt() {
-        // Handle service interruptions (e.g., the service is interrupted or stopped)
-        // In most cases, you don't need to do anything here, but you can release resources if needed
+        Log.d("MyAccessibilityService", "Service Interrupted")
     }
 }

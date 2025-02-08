@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
-    android:accessibilityFeedbackType="feedbackGeneric"
-    android:accessibilityFlags="flagDefault"
-    android:packageNames="com.instagram.android"
-    android:notificationTimeout="100"
-    android:canRetrieveWindowContent="true"/>
+    android:accessibilityFlags="flagDefault">
+    <!-- The types of events we want to listen to -->
+    <accessibility-event-types android:value="typeWindowStateChanged|typeWindowContentChanged" />
+
+    <!-- The apps we want to monitor -->
+    <package-names android:value="com.instagram.android" />
+
+    <!-- Can this service access the window content of apps? -->
+    <can-retrieve-window-content android:value="true" />
+
+    <!-- Feedback type: generic feedback, this can be changed based on your use case -->
+    <feedback-type android:value="feedbackGeneric" />
+
+    <!-- You can set other settings here based on the functionality you want -->
+    <notification-timeout android:value="100" />
+</accessibility-service>
