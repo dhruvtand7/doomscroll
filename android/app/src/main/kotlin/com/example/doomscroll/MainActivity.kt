@@ -2,22 +2,23 @@ package com.example.doomscroll
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.app.Activity
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.EventChannel
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "doomscroll/foreground_app"
+    private val METHOD_CHANNEL = "doomscroll/foreground_app"
+    private val SCROLL_COUNT_CHANNEL = "doomscroll/scroll_count"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+        // Existing method channel for accessibility-related methods
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "requestAccessibilityPermission" -> {
                     requestAccessibilityPermission()
@@ -26,11 +27,22 @@ class MainActivity : FlutterActivity() {
                 "isInstagramRunning" -> {
                     result.success(isInstagramRunning())
                 }
-                else -> {
-                    result.notImplemented()
-                }
+                else -> result.notImplemented()
             }
         }
+
+        // Set up the EventChannel for scroll count updates
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, SCROLL_COUNT_CHANNEL).setStreamHandler(
+            object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    // Directly assign the event sink to the one in MyAccessibilityService
+                    MyAccessibilityService.eventSink = events
+                }
+                override fun onCancel(arguments: Any?) {
+                    MyAccessibilityService.eventSink = null
+                }
+            }
+        )
     }
 
     private fun requestAccessibilityPermission() {

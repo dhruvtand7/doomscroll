@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import for MethodChannel
+import 'package:flutter/services.dart'; // For MethodChannel and EventChannel
 
 void main() {
   runApp(DoomScrollApp());
@@ -56,25 +56,35 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// Scroll Tracker Page
+// Scroll Tracker Page: Displays the native scroll count sent via the EventChannel.
 class ScrollTrackerPage extends StatefulWidget {
   @override
   _ScrollTrackerPageState createState() => _ScrollTrackerPageState();
 }
 
 class _ScrollTrackerPageState extends State<ScrollTrackerPage> {
-  int upSwipeCount = 0;
-  double _startPosition = 0.0;
-  bool _isSwipe = false;
+  int nativeScrollCount = 0;
   bool _isInstagramRunning = false;
 
-  static final platform = MethodChannel('doomscroll/foreground_app');
+  // MethodChannel for permission and state checks.
+  static final MethodChannel platform = MethodChannel('doomscroll/foreground_app');
+  // EventChannel for receiving native scroll count updates.
+  static final EventChannel scrollCountChannel = EventChannel('doomscroll/scroll_count');
 
   @override
   void initState() {
     super.initState();
     _checkIfInstagramIsRunning();
     _requestAccessibilityPermission();
+
+    // Listen for native scroll count updates from the Android side.
+    scrollCountChannel.receiveBroadcastStream().listen((event) {
+      setState(() {
+        nativeScrollCount = event as int;
+      });
+    }, onError: (error) {
+      print("Error receiving scroll count: $error");
+    });
   }
 
   Future<void> _checkIfInstagramIsRunning() async {
@@ -96,61 +106,39 @@ class _ScrollTrackerPageState extends State<ScrollTrackerPage> {
     }
   }
 
-  void _onVerticalDragStart(DragStartDetails details) {
-    _startPosition = details.localPosition.dy;
-    _isSwipe = false;
-  }
-
-  void _onVerticalDragUpdate(DragUpdateDetails details) {
-    if ((_startPosition - details.localPosition.dy).abs() > 10) {
-      _isSwipe = true;
-    }
-  }
-
-  void _onVerticalDragEnd(DragEndDetails details) {
-    if (_isSwipe && _isInstagramRunning) {
-      double delta = _startPosition - (details.primaryVelocity ?? 0.0);
-      if (delta > 100) {
-        setState(() {
-          upSwipeCount++;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Scroll Length Tracker')),
-      body: GestureDetector(
-        onVerticalDragStart: _onVerticalDragStart,
-        onVerticalDragUpdate: _onVerticalDragUpdate,
-        onVerticalDragEnd: _onVerticalDragEnd,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Swipe Count: $upSwipeCount', style: TextStyle(fontSize: 24)),
-              SizedBox(height: 20),
-              Text(
-                _isInstagramRunning ? "Instagram is running" : "Instagram is not running",
-                style: TextStyle(fontSize: 18),
-              ),
-            ],
-          ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Native Scroll Count: $nativeScrollCount',
+              style: TextStyle(fontSize: 24),
+            ),
+            SizedBox(height: 20),
+            Text(
+              _isInstagramRunning ? "Instagram is running" : "Instagram is not running",
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// Dopamine Detox Page
+// A simple Dopamine Detox Page.
 class DopamineDetoxPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Dopamine Detox')),
-      body: Center(child: Text('Dopamine Detox Page')),
+      body: Center(
+        child: Text('Dopamine Detox Page', style: TextStyle(fontSize: 24)),
+      ),
     );
   }
 }
